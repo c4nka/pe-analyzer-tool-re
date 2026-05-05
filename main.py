@@ -1,13 +1,22 @@
+import argparse
 import sys
+import os
 from analyzer.pe_parser import PEAnalyzer
-from analyzer.utils import print_banner, print_section_results, print_imports
+from analyzer.utils import print_banner, print_section_results, print_imports, check_suspicious_apis
 
 def main():
-    if len(sys.argv) < 2:
-        print("Kullanım: python main.py <analiz_edilecek_dosya.exe>")
+    # Argüman ayrıştırıcı (Daha profesyonel kullanıcı arayüzü ve hata yönetimi)
+    parser = argparse.ArgumentParser(description="Gelişmiş PE (Portable Executable) Analiz Aracı")
+    parser.add_argument("file", help="Analiz edilecek .exe veya .dll dosyasının yolu")
+    
+    # Kullanıcı eksik komut girerse argparse otomatik şık bir hata mesajı üretir
+    args = parser.parse_args()
+    target_file = args.file
+
+    if not os.path.exists(target_file):
+        print(f"[!] HATA: Belirtilen dosya bulunamadı -> {target_file}")
         sys.exit(1)
-        
-    target_file = sys.argv[1]
+
     print_banner(target_file)
     
     try:
@@ -28,10 +37,13 @@ def main():
         imports = analyzer.get_imports()
         print_imports(imports)
         
+        # 4. Şüpheli API (Güvenlik) Kontrolü
+        check_suspicious_apis(imports)
+        
     except ValueError as ve:
-        print(f"[!] HATA: {ve}")
+        print(f"[!] FORMAT HATASI: {ve}")
     except Exception as e:
-        print(f"[!] Beklenmeyen bir hata oluştu: {e}")
+        print(f"[!] BEKLENMEYEN HATA: Analiz sırasında bir sorun oluştu: {e}")
 
 if __name__ == "__main__":
     main()
