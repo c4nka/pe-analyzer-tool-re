@@ -31,3 +31,29 @@ def print_imports(imports_data: dict):
             print(f"         - ... (+ {len(funcs) - 3} fonksiyon daha)")
             
     print("-" * 60 + "\n")
+    
+def check_suspicious_apis(imports_data: dict):
+    """İçe aktarılan fonksiyonlar arasında bilinen zararlı/şüpheli API'leri arar."""
+    # Zararlı yazılımların sık kullandığı (Anti-Debug, Injection, Keylogging) API listesi
+    suspicious_apis = [
+        "IsDebuggerPresent", "CheckRemoteDebuggerPresent", # Anti-Debugging
+        "VirtualAlloc", "VirtualAllocEx", "WriteProcessMemory", "CreateRemoteThread", # Process Injection
+        "SetWindowsHookEx", "GetAsyncKeyState", # Keylogging
+        "HttpSendRequestA", "InternetOpenA", "InternetConnectA" # C2 Bağlantısı / İndirme
+    ]
+    
+    found_suspicious = []
+    
+    for dll, funcs in imports_data.items():
+        for func in funcs:
+            if func in suspicious_apis:
+                found_suspicious.append(f"{func} (Kaynak: {dll})")
+                
+    print("[!] GÜVENLİK ANALİZİ: ŞÜPHELİ API TESPİTİ")
+    if found_suspicious:
+        print("    [UYARI] Dosya içerisinde zararlı yazılım davranışı gösterebilecek API'ler bulundu:")
+        for alert in found_suspicious:
+            print(f"      - {alert}")
+    else:
+        print("    [+] Bilinen kritik/şüpheli bir API çağrısı tespit edilmedi.")
+    print("-" * 60 + "\n")
