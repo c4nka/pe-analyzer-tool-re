@@ -2,4 +2,4 @@
 
 - [x] `analyzer/pe_parser.py`: İçe aktarılan fonksiyonların (Imports - DLL) ayrıştırılması için yeni bir metot yazılacak.
 - [ ] `analyzer/entropy.py`: Çok büyük dosyalar analiz edilirken entropi hesaplamasının performansı test edilecek.
-- [ ] `main.py`: Kullanıcı dostu hata mesajları geliştirilecek.
+- [x] `main.py`: Kullanıcı dostu hata mesajları geliştirilecek.
