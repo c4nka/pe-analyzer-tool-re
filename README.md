@@ -11,8 +11,8 @@
 ## Proje Bilgileri
 * **Kurum:** İstinye Üniversitesi
 * **Ders:** Tersine Mühendislik (Reverse Engineering)
-* **Danışman / Eğitmen:** [Danışman Hocanın Adı Soyadı]
-* **Geliştirici:** [Senin Adın Soyadın]
+* **Danışman / Eğitmen:** Keyvan Arasteh Abbasabad
+* **Geliştirici:** Raşit Çankaya
 
 ## İçindekiler
 - [Proje Hakkında](#proje-hakkında)
