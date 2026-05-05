@@ -1,9 +1,8 @@
 import sys
 from analyzer.pe_parser import PEAnalyzer
-from analyzer.utils import print_banner, print_section_results
+from analyzer.utils import print_banner, print_section_results, print_imports
 
 def main():
-    # Komut satırı argümanı kontrolü
     if len(sys.argv) < 2:
         print("Kullanım: python main.py <analiz_edilecek_dosya.exe>")
         sys.exit(1)
@@ -12,19 +11,22 @@ def main():
     print_banner(target_file)
     
     try:
-        # Modüler mimariyi kullanarak nesne oluşturma
         analyzer = PEAnalyzer(target_file)
         
-        # Temel bilgileri al ve yazdır
+        # 1. Temel Bilgiler
         basic_info = analyzer.get_basic_info()
         print("[+] TEMEL BİLGİLER")
         for key, value in basic_info.items():
             print(f"    {key:<15}: {value}")
         print("\n")
         
-        # Bölümleri analiz et ve yazdır
+        # 2. Bölümler ve Entropi
         sections = analyzer.analyze_sections()
         print_section_results(sections)
+        
+        # 3. İçe Aktarmalar (Imports)
+        imports = analyzer.get_imports()
+        print_imports(imports)
         
     except ValueError as ve:
         print(f"[!] HATA: {ve}")
