@@ -35,3 +35,11 @@ Uygulama tamamen modüler bir yapıda tasarlanmıştır. Sınıf hiyerarşisi, m
 
 ## Kurulum ve Kullanım
 Adım adım kurulum, gereksinimler ve örnek analiz komutları için lütfen [Kullanım Kılavuzunu](docs/usage.md) inceleyiniz.
+
+### 🐳 Docker ile Çalıştırma
+Projeyi kendi ortamınıza kurmadan izole bir konteyner içinde çalıştırmak için:
+
+1. İmajı derleyin:
+   `docker build -t pe-analyzer .`
+2. Konteyneri çalıştırın (Analiz edilecek dosyayı volume olarak bağlayarak):
+   `docker run --rm -v C:\Windows\System32\calc.exe:/target.exe pe-analyzer /target.exe`
