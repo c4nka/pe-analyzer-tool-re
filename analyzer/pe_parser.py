@@ -37,3 +37,19 @@ class PEAnalyzer:
                 "Durum": status
             })
         return sections_info
+
+    def get_imports(self) -> dict:
+        """İçe aktarılan (Imported) DLL'leri ve fonksiyonları analiz eder."""
+        imports_info = {}
+        if hasattr(self.pe, 'DIRECTORY_ENTRY_IMPORT'):
+            for entry in self.pe.DIRECTORY_ENTRY_IMPORT:
+                try:
+                    dll_name = entry.dll.decode('utf-8')
+                    funcs = []
+                    for imp in entry.imports:
+                        if imp.name:
+                            funcs.append(imp.name.decode('utf-8'))
+                    imports_info[dll_name] = funcs
+                except Exception:
+                    continue
+        return imports_info
