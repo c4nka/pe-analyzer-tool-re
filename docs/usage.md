@@ -21,3 +21,4 @@ python main.py <dosya_yolu>
 ```bash
 python main.py C:\Windows\System32\calc.exe
 ```
+Araç çalıştıktan sonra sırasıyla Temel Bilgiler, Bölüm/Entropi Tablosu, İçe Aktarılan Kütüphaneler ve Güvenlik Analizi sonuçlarını ekrana basacaktır.
