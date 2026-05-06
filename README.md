@@ -43,3 +43,6 @@ Projeyi kendi ortamınıza kurmadan izole bir konteyner içinde çalıştırmak 
    `docker build -t pe-analyzer .`
 2. Konteyneri çalıştırın (Analiz edilecek dosyayı volume olarak bağlayarak):
    `docker run --rm -v C:\Windows\System32\calc.exe:/target.exe pe-analyzer /target.exe`
+
+## ⚖️ Yasal Uyarı
+Bu araç tamamen eğitim ve akademik araştırma amaçlı geliştirilmiştir. Hukuki şartlar ve kullanım koşulları için lütfen [Sorumluluk Reddi (Disclaimer)](DISCLAIMER.md) belgesini okuyunuz.
