@@ -2,7 +2,14 @@ import argparse
 import sys
 import os
 from analyzer.pe_parser import PEAnalyzer
-from analyzer.utils import print_banner, print_section_results, print_imports, check_suspicious_apis
+from analyzer.utils import (
+    print_banner, 
+    print_section_results, 
+    print_imports, 
+    check_suspicious_apis,
+    calculate_hashes,
+    print_hashes
+)
 
 def main():
     # Argüman ayrıştırıcı (Daha profesyonel kullanıcı arayüzü ve hata yönetimi)
@@ -21,6 +28,11 @@ def main():
     
     try:
         analyzer = PEAnalyzer(target_file)
+        
+        # --- YENİ EKLENEN KISIM: HASH HESAPLAMA ---
+        # 0. Dosya Hash Değerleri (Malware Kimliği)
+        hashes = calculate_hashes(target_file)
+        print_hashes(hashes)
         
         # 1. Temel Bilgiler
         basic_info = analyzer.get_basic_info()
