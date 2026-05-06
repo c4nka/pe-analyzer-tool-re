@@ -1,3 +1,5 @@
+import hashlib
+
 def print_banner(file_name: str):
     """Terminalde analizin başladığını gösteren şık bir karşılama basar."""
     print("\n" + "="*60)
@@ -56,4 +58,29 @@ def check_suspicious_apis(imports_data: dict):
             print(f"      - {alert}")
     else:
         print("    [+] Bilinen kritik/şüpheli bir API çağrısı tespit edilmedi.")
+    print("-" * 60 + "\n")
+
+def calculate_hashes(file_path: str) -> dict:
+    """Dosyanın MD5 ve SHA-256 özet (hash) değerlerini hesaplar."""
+    hashes = {'MD5': hashlib.md5(), 'SHA-256': hashlib.sha256()}
+    
+    try:
+        # Dosyayı chunk'lar halinde oku (Büyük dosyalar için RAM dostu yaklaşım)
+        with open(file_path, "rb") as f:
+            while chunk := f.read(8192):
+                hashes['MD5'].update(chunk)
+                hashes['SHA-256'].update(chunk)
+                
+        return {
+            'MD5': hashes['MD5'].hexdigest(),
+            'SHA-256': hashes['SHA-256'].hexdigest()
+        }
+    except Exception as e:
+        return {'Hata': str(e)}
+
+def print_hashes(hashes_data: dict):
+    """Hesaplanan Hash değerlerini terminale şık bir şekilde basar."""
+    print("[+] DOSYA KİMLİĞİ (HASH DEĞERLERİ)")
+    for algo, h_val in hashes_data.items():
+        print(f"    {algo:<10}: {h_val}")
     print("-" * 60 + "\n")
