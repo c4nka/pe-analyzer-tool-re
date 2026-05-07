@@ -1,4 +1,5 @@
 import hashlib
+import json
 
 def print_banner(file_name: str):
     """Terminalde analizin başladığını gösteren şık bir karşılama basar."""
@@ -84,3 +85,31 @@ def print_hashes(hashes_data: dict):
     for algo, h_val in hashes_data.items():
         print(f"    {algo:<10}: {h_val}")
     print("-" * 60 + "\n")
+
+def export_report(data: dict, output_file: str):
+    """Analiz sonuçlarını JSON veya TXT formatında dışa aktarır."""
+    file_ext = output_file.split('.')[-1].lower()
+    
+    try:
+        if file_ext == 'json':
+            with open(output_file, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=4, ensure_ascii=False)
+        else:
+            # Varsayılan olarak TXT formatında şık bir rapor oluşturur
+            with open(output_file, 'w', encoding='utf-8') as f:
+                f.write(f"PE ANALİZ RAPORU\n{'='*20}\n")
+                for key, value in data.items():
+                    if isinstance(value, list):
+                        f.write(f"\n[+] {key.upper()}\n")
+                        for item in value:
+                            f.write(f"  - {item}\n")
+                    elif isinstance(value, dict):
+                        f.write(f"\n[+] {key.upper()}\n")
+                        for k, v in value.items():
+                            f.write(f"  {k}: {v}\n")
+                    else:
+                        f.write(f"{key}: {value}\n")
+        
+        print(f"\n[OK] Rapor başarıyla kaydedildi: {output_file}")
+    except Exception as e:
+        print(f"\n[!] Rapor oluşturulurken hata: {e}")
