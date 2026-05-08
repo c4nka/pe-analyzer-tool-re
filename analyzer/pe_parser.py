@@ -53,3 +53,23 @@ class PEAnalyzer:
                 except Exception:
                     continue
         return imports_info
+
+def get_ip_metadata(self) -> dict:
+        """PE dosyasının içindeki yasal meta verileri (Fikri Mülkiyet/Lisans) çıkarır."""
+        version_info = {}
+        
+        # Dosyada sürüm/meta veri bloğu olup olmadığını kontrol et
+        if hasattr(self.pe, 'VS_VERSIONINFO') and hasattr(self.pe, 'FileInfo'):
+            for fileinfo in self.pe.FileInfo:
+                for file_info_item in fileinfo:
+                    if hasattr(file_info_item, 'StringTable'):
+                        for st in file_info_item.StringTable:
+                            for entry in st.entries.items():
+                                try:
+                                    # Veriler genellikle byte (UTF-8) olarak saklanır
+                                    key = entry[0].decode('utf-8', 'ignore')
+                                    value = entry[1].decode('utf-8', 'ignore')
+                                    version_info[key] = value
+                                except Exception:
+                                    continue
+        return version_info
