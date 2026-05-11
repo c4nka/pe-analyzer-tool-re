@@ -1,64 +1,58 @@
+import os
 import hashlib
 import json
 
-def print_banner(file_name: str):
-    """Terminalde analizin başladığını gösteren şık bir karşılama basar."""
-    print("\n" + "="*60)
-    print(f"[*] STATİK PE ANALİZİ BAŞLATILIYOR: {file_name}")
-    print("="*60 + "\n")
+def print_banner(target_file):
+    print("=" * 60)
+    print(f"[*] PE ANALİZ BAŞLATILIYOR: {target_file}")
+    print("=" * 60 + "\n")
 
-def print_section_results(sections: list):
-    """Bölüm analiz sonuçlarını tablo formatında terminale yazdırır."""
-    print("[+] BÖLÜMLER VE ENTROPİ DEĞERLERİ")
-    print(f"{'İsim':<10} | {'Sanal Boyut':<12} | {'Entropi':<10} | {'Durum'}")
-    print("-" * 60)
+def print_section_results(sections):
+    print("[+] BÖLÜMLER (SECTIONS) VE ENTROPİ")
     for sec in sections:
-        print(f"{sec['İsim']:<10} | {sec['Sanal Boyut']:<12} | {sec['Entropi']:<10} | {sec['Durum']}")
-    print("-" * 60 + "\n")
-
-def print_imports(imports_data: dict):
-    """İçe aktarılan DLL ve fonksiyonları okunabilir formatta yazdırır."""
-    print("[+] KULLANILAN KÜTÜPHANELER VE FONKSİYONLAR (IMPORTS)")
-    if not imports_data:
-        print("    [!] İçe aktarılan fonksiyon bulunamadı (Dosya gizlenmiş olabilir).")
-        print("-" * 60 + "\n")
-        return
+        name = sec.get('Name', 'Bilinmiyor')
+        v_addr = sec.get('VirtualAddress', '')
+        v_size = sec.get('VirtualSize', '')
+        entropy = sec.get('Entropy', 0.0)
         
-    for dll, funcs in imports_data.items():
-        print(f"    -> {dll}")
-        # Ekranı boğmamak için her DLL'in sadece ilk 3 fonksiyonunu gösterelim
-        for i, func in enumerate(funcs):
-            if i < 3:
-                print(f"         - {func}")
-        if len(funcs) > 3:
-            print(f"         - ... (+ {len(funcs) - 3} fonksiyon daha)")
-            
-    print("-" * 60 + "\n")
+        # Yüksek entropi paketlenmiş (packed) veya şifrelenmiş kodu işaret edebilir
+        entropy_alert = " (DİKKAT: Yüksek Entropi - Paketlenmiş Olabilir!)" if entropy > 7.0 else ""
+        
+        print(f"    - {name:<8} | Adres: {v_addr:<10} | Boyut: {v_size:<10} | Entropi: {entropy:.4f}{entropy_alert}")
+    print("\n")
+
+def print_imports(imports):
+    print("[+] KULLANILAN KÜTÜPHANELER (IMPORTS)")
+    if not imports:
+        print("    [!] İçe aktarılan kütüphane bulunamadı.")
+    for dll, apis in imports.items():
+        print(f"    - {dll}: {len(apis)} API kullanılıyor")
+    print("\n")
+
+def check_suspicious_apis(imports):
+    print("[+] ŞÜPHELİ API KONTROLÜ (GÜVENLİK)")
     
-def check_suspicious_apis(imports_data: dict):
-    """İçe aktarılan fonksiyonlar arasında bilinen zararlı/şüpheli API'leri arar."""
-    # Zararlı yazılımların sık kullandığı (Anti-Debug, Injection, Keylogging) API listesi
-    suspicious_apis = [
-        "IsDebuggerPresent", "CheckRemoteDebuggerPresent", # Anti-Debugging
-        "VirtualAlloc", "VirtualAllocEx", "WriteProcessMemory", "CreateRemoteThread", # Process Injection
-        "SetWindowsHookEx", "GetAsyncKeyState", # Keylogging
-        "HttpSendRequestA", "InternetOpenA", "InternetConnectA" # C2 Bağlantısı / İndirme
+    # Zararlı yazılımların sık kullandığı riskli fonksiyonlar
+    suspicious_list = [
+        'CreateRemoteThread', 'VirtualAllocEx', 'WriteProcessMemory', 
+        'ReadProcessMemory', 'LoadLibraryA', 'GetProcAddress', 
+        'SetWindowsHookEx', 'RegSetValueEx', 'WinExec', 'ShellExecute',
+        'IsDebuggerPresent', 'CryptAcquireContext'
     ]
     
     found_suspicious = []
     
-    for dll, funcs in imports_data.items():
-        for func in funcs:
-            if func in suspicious_apis:
-                found_suspicious.append(f"{func} (Kaynak: {dll})")
+    for dll, apis in imports.items():
+        for api in apis:
+            if api in suspicious_list:
+                found_suspicious.append(f"{api} (Kaynak: {dll})")
                 
-    print("[!] GÜVENLİK ANALİZİ: ŞÜPHELİ API TESPİTİ")
     if found_suspicious:
-        print("    [UYARI] Dosya içerisinde zararlı yazılım davranışı gösterebilecek API'ler bulundu:")
-        for alert in found_suspicious:
-            print(f"      - {alert}")
+        print("    [!] DİKKAT! Şüpheli fonksiyonlar tespit edildi:")
+        for item in found_suspicious:
+            print(f"        - {item}")
     else:
-        print("    [+] Bilinen kritik/şüpheli bir API çağrısı tespit edilmedi.")
+        print("    [OK] Bilinen şüpheli API çağrısı tespit edilmedi.")
     print("-" * 60 + "\n")
 
 def calculate_hashes(file_path: str) -> dict:
@@ -66,7 +60,6 @@ def calculate_hashes(file_path: str) -> dict:
     hashes = {'MD5': hashlib.md5(), 'SHA-256': hashlib.sha256()}
     
     try:
-        # Dosyayı chunk'lar halinde oku (Büyük dosyalar için RAM dostu yaklaşım)
         with open(file_path, "rb") as f:
             while chunk := f.read(8192):
                 hashes['MD5'].update(chunk)
@@ -95,7 +88,6 @@ def export_report(data: dict, output_file: str):
             with open(output_file, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=4, ensure_ascii=False)
         else:
-            # Varsayılan olarak TXT formatında şık bir rapor oluşturur
             with open(output_file, 'w', encoding='utf-8') as f:
                 f.write(f"PE ANALİZ RAPORU\n{'='*20}\n")
                 for key, value in data.items():
@@ -109,8 +101,12 @@ def export_report(data: dict, output_file: str):
                             f.write(f"  {k}: {v}\n")
                     else:
                         f.write(f"{key}: {value}\n")
+        
+        print(f"\n[OK] Rapor başarıyla kaydedildi: {output_file}")
+    except Exception as e:
+        print(f"\n[!] Rapor oluşturulurken hata: {e}")
 
-        def print_ip_audit(metadata: dict):
+def print_ip_audit(metadata: dict):
     """Fikri Mülkiyet ve Lisans (IP Audit) verilerini terminale basar."""
     print("[+] FİKRİ MÜLKİYET VE LİSANS DENETİMİ (IP AUDIT)")
     
@@ -120,7 +116,6 @@ def export_report(data: dict, output_file: str):
         print("-" * 60 + "\n")
         return
         
-    # Hukuki uyuşmazlıklarda incelenen kritik alanlar
     legal_keys = [
         'CompanyName', 
         'LegalCopyright', 
@@ -140,7 +135,3 @@ def export_report(data: dict, output_file: str):
         print("    [!] Yasal bağlayıcılığı olan standart anahtarlar (Telif/Marka vb.) bulunamadı.")
         
     print("-" * 60 + "\n")
-        
-        print(f"\n[OK] Rapor başarıyla kaydedildi: {output_file}")
-    except Exception as e:
-        print(f"\n[!] Rapor oluşturulurken hata: {e}")
