@@ -109,6 +109,37 @@ def export_report(data: dict, output_file: str):
                             f.write(f"  {k}: {v}\n")
                     else:
                         f.write(f"{key}: {value}\n")
+
+        def print_ip_audit(metadata: dict):
+    """Fikri Mülkiyet ve Lisans (IP Audit) verilerini terminale basar."""
+    print("[+] FİKRİ MÜLKİYET VE LİSANS DENETİMİ (IP AUDIT)")
+    
+    if not metadata:
+        print("    [!] Dosya içinde yasal meta veri bulunamadı.")
+        print("    [?] Not: Korsan, manipüle edilmiş veya amatör yazılımlarda bu alan genellikle boştur.")
+        print("-" * 60 + "\n")
+        return
+        
+    # Hukuki uyuşmazlıklarda incelenen kritik alanlar
+    legal_keys = [
+        'CompanyName', 
+        'LegalCopyright', 
+        'LegalTrademarks', 
+        'OriginalFilename', 
+        'ProductName',
+        'FileVersion'
+    ]
+    
+    found_any = False
+    for key in legal_keys:
+        if key in metadata and metadata[key].strip():
+            print(f"    {key:<18}: {metadata[key]}")
+            found_any = True
+            
+    if not found_any:
+        print("    [!] Yasal bağlayıcılığı olan standart anahtarlar (Telif/Marka vb.) bulunamadı.")
+        
+    print("-" * 60 + "\n")
         
         print(f"\n[OK] Rapor başarıyla kaydedildi: {output_file}")
     except Exception as e:
