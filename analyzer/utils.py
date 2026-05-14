@@ -1,6 +1,7 @@
 import os
 import hashlib
 import json
+import requests
 
 def print_banner(target_file):
     print("=" * 60)
@@ -135,3 +136,52 @@ def print_ip_audit(metadata: dict):
         print("    [!] Yasal bağlayıcılığı olan standart anahtarlar (Telif/Marka vb.) bulunamadı.")
         
     print("-" * 60 + "\n")
+
+def check_virustotal(file_hash: str, api_key: str) -> dict:
+    """VirusTotal API v3 kullanarak dosyanın tehdit istihbaratını çeker."""
+    print("[+] VIRUSTOTAL TEHDİT İSTİHBARATI (CANLI OSINT)")
+    
+    if not api_key:
+        print("    [!] VirusTotal API anahtarı bulunamadı.")
+        print("    [?] Bilgi: Canlı tarama için komut satırında --vt <API_KEY> parametresini kullanın.")
+        print("-" * 60 + "\n")
+        return {"Durum": "API Anahtarı Eksik"}
+
+    url = f"https://www.virustotal.com/api/v3/files/{file_hash}"
+    headers = {"x-apikey": api_key}
+
+    try:
+        print("    [*] VirusTotal veri tabanı sorgulanıyor... Lütfen bekleyin.")
+        response = requests.get(url, headers=headers)
+
+        if response.status_code == 200:
+            data = response.json()
+            stats = data['data']['attributes']['last_analysis_stats']
+            malicious = stats.get('malicious', 0)
+            undetected = stats.get('undetected', 0)
+            total = malicious + undetected + stats.get('harmless', 0) + stats.get('suspicious', 0)
+
+            print(f"    [!] Küresel Tespit Oranı: {total} güvenlik motorundan {malicious} tanesi ZARARLI buldu!")
+
+            if malicious > 0:
+                print("    [!] DİKKAT: Bu dosya yüksek ihtimalle ZARARLI (Malware)!")
+            else:
+                print("    [OK] Dosya temiz görünüyor (Bilinen bir tehdit bulunamadı).")
+            
+            print("-" * 60 + "\n")
+            return {"tespit_edilen": malicious, "toplam_tarama": total, "durum": "Basarili"}
+
+        elif response.status_code == 404:
+            print("    [?] Bu dosya daha önce VirusTotal'de hiç taranmamış.")
+            print("    [!] DİKKAT: Bu bir Zero-Day (Sıfırıncı Gün) zararlısı veya tamamen yeni/özel bir dosya olabilir!")
+            print("-" * 60 + "\n")
+            return {"durum": "Dosya Bulunamadı (Zero-Day İhtimali)"}
+        else:
+            print(f"    [!] API Hatası: Yetkisiz erişim veya limit aşımı (Kod: {response.status_code})")
+            print("-" * 60 + "\n")
+            return {"durum": f"API Hatasi {response.status_code}"}
+
+    except Exception as e:
+        print(f"    [!] İnternet bağlantısı veya sorgu hatası: {e}")
+        print("-" * 60 + "\n")
+        return {"hata": str(e)}
