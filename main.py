@@ -10,16 +10,16 @@ from analyzer.utils import (
     calculate_hashes, 
     print_hashes, 
     export_report,
-    print_ip_audit
+    print_ip_audit,
+    check_virustotal  # <-- YENİ EKLENDİ
 )
 
 def main():
-    # Argüman ayrıştırıcı (Daha profesyonel kullanıcı arayüzü ve hata yönetimi)
-    parser = argparse.ArgumentParser(description="Gelişmiş PE (Portable Executable) Analiz Aracı")
+    parser = argparse.ArgumentParser(description="Gelişmiş PE Analiz ve Tehdit İstihbarat Aracı")
     parser.add_argument("file", help="Analiz edilecek .exe veya .dll dosyasının yolu")
-    parser.add_argument("--export", "-o", help="Sonuçları dosyaya kaydet (Örn: rapor.json veya rapor.txt)")
+    parser.add_argument("--export", "-o", help="Sonuçları dosyaya kaydet (Örn: rapor.json)")
+    parser.add_argument("--vt", help="Canlı tehdit istihbaratı için VirusTotal API Anahtarı") # <-- YENİ EKLENDİ
     
-    # Kullanıcı eksik komut girerse argparse otomatik şık bir hata mesajı üretir
     args = parser.parse_args()
     target_file = args.file
 
@@ -28,8 +28,6 @@ def main():
         sys.exit(1)
 
     print_banner(target_file)
-    
-    # Raporlama için tüm analiz verilerini toplayacağımız ana sözlük
     report_data = {"dosya_yolu": target_file}
     
     try:
@@ -38,7 +36,13 @@ def main():
         # 0. Dosya Hash Değerleri (Malware Kimliği)
         hashes = calculate_hashes(target_file)
         print_hashes(hashes)
-        report_data["hash_değerleri"] = hashes
+        report_data["hash_degerleri"] = hashes
+        
+        # [YENİ] 0.5 VirusTotal Canlı İstihbarat
+        if args.vt:
+            # SHA-256 kullanarak VT veri tabanını sorgula
+            vt_results = check_virustotal(hashes.get('SHA-256'), args.vt)
+            report_data["virustotal_raporu"] = vt_results
         
         # 1. Temel Bilgiler
         basic_info = analyzer.get_basic_info()
@@ -49,20 +53,19 @@ def main():
         print("\n")
         
         # 1.5 Fikri Mülkiyet ve Lisans Denetimi (IP Audit)
-        # Hukuki süreçlerde kritik olan Telif Hakkı ve Şirket bilgilerini çıkarır
         ip_metadata = analyzer.get_ip_metadata()
         print_ip_audit(ip_metadata)
-        report_data["fikri_mülkiyet_denetimi"] = ip_metadata
+        report_data["fikri_mulkiyet_denetimi"] = ip_metadata
         
         # 2. Bölümler ve Entropi
         sections = analyzer.analyze_sections()
         print_section_results(sections)
-        report_data["bölümler"] = sections
+        report_data["bolumler"] = sections
         
         # 3. İçe Aktarmalar (Imports)
         imports = analyzer.get_imports()
         print_imports(imports)
-        report_data["kullanılan_kütüphaneler"] = list(imports.keys())
+        report_data["kullanilan_kutuphaneler"] = list(imports.keys())
         
         # 4. Şüpheli API (Güvenlik) Kontrolü
         check_suspicious_apis(imports)
