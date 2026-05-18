@@ -74,3 +74,34 @@ def get_ip_metadata(self) -> dict:
                                 except Exception:
                                     continue
         return version_info
+
+def extract_iocs(self) -> dict:
+        """Dosya içerisindeki metinleri (strings) tarayarak IP, URL ve E-posta (IoC) adreslerini avlar."""
+        iocs = {'IP_Adresleri': set(), 'URL_Adresleri': set(), 'E_Postalar': set()}
+        
+        # Olası IoC'leri yakalayacak Regex (Düzenli İfade) kalıpları
+        ip_pattern = rb'\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b'
+        url_pattern = rb'https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+'
+        email_pattern = rb'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
+        
+        try:
+            # Dosyayı ikili (binary) formatta oku
+            with open(self.file_path, 'rb') as f:
+                data = f.read()
+                
+            # Regex ile eşleşmeleri bul ve tekrar edenleri (set kullanarak) engelle
+            for ip in re.findall(ip_pattern, data):
+                # Yakalanan geçerli IPv4 formatlarını string'e çevir
+                iocs['IP_Adresleri'].add(ip.decode('utf-8', 'ignore'))
+                
+            for url in re.findall(url_pattern, data):
+                iocs['URL_Adresleri'].add(url.decode('utf-8', 'ignore'))
+                
+            for email in re.findall(email_pattern, data):
+                iocs['E_Postalar'].add(email.decode('utf-8', 'ignore'))
+                
+        except Exception as e:
+            print(f"    [!] IoC taraması sırasında hata: {e}")
+            
+        # Set nesnelerini JSON'a yazılabilmesi için List formatına dönüştür
+        return {k: list(v) for k, v in iocs.items() if v}
