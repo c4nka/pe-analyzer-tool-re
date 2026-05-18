@@ -11,15 +11,15 @@ from analyzer.utils import (
     print_hashes, 
     export_report,
     print_ip_audit,
-    print_iocs,
-    check_virustotal  # <-- YENİ EKLENDİ
+    check_virustotal,
+    print_iocs
 )
 
 def main():
     parser = argparse.ArgumentParser(description="Gelişmiş PE Analiz ve Tehdit İstihbarat Aracı")
     parser.add_argument("file", help="Analiz edilecek .exe veya .dll dosyasının yolu")
     parser.add_argument("--export", "-o", help="Sonuçları dosyaya kaydet (Örn: rapor.json)")
-    parser.add_argument("--vt", help="Canlı tehdit istihbaratı için VirusTotal API Anahtarı") # <-- YENİ EKLENDİ
+    parser.add_argument("--vt", help="Canlı tehdit istihbaratı için VirusTotal API Anahtarı")
     
     args = parser.parse_args()
     target_file = args.file
@@ -39,9 +39,8 @@ def main():
         print_hashes(hashes)
         report_data["hash_degerleri"] = hashes
         
-        # [YENİ] 0.5 VirusTotal Canlı İstihbarat
+        # 0.5 VirusTotal Canlı İstihbarat
         if args.vt:
-            # SHA-256 kullanarak VT veri tabanını sorgula
             vt_results = check_virustotal(hashes.get('SHA-256'), args.vt)
             report_data["virustotal_raporu"] = vt_results
         
@@ -57,6 +56,11 @@ def main():
         ip_metadata = analyzer.get_ip_metadata()
         print_ip_audit(ip_metadata)
         report_data["fikri_mulkiyet_denetimi"] = ip_metadata
+        
+        # 1.8 Gizli IoC ve C2 Sunucu Tespiti
+        iocs = analyzer.extract_iocs()
+        print_iocs(iocs)
+        report_data["tehdit_gostergeleri_ioc"] = iocs
         
         # 2. Bölümler ve Entropi
         sections = analyzer.analyze_sections()
