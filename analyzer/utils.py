@@ -185,3 +185,20 @@ def check_virustotal(file_hash: str, api_key: str) -> dict:
         print(f"    [!] İnternet bağlantısı veya sorgu hatası: {e}")
         print("-" * 60 + "\n")
         return {"hata": str(e)}
+
+def print_iocs(iocs: dict):
+    """Tespit edilen IoC (Uzlaşma Göstergesi) verilerini terminale basar."""
+    print("[+] GİZLİ TEHDİT GÖSTERGELERİ (IoC) VE AĞ BAĞLANTILARI")
+    
+    if not iocs:
+        print("    [OK] Dosya içerisinde gömülü IP, URL veya E-posta adresine rastlanmadı.")
+    else:
+        for category, items in iocs.items():
+            print(f"    [*] {category} ({len(items)} adet bulundu):")
+            # Çok fazla çıktı olup terminali boğmaması için sadece ilk 5'ini göster
+            for item in items[:5]:
+                print(f"        - {item}")
+            if len(items) > 5:
+                print(f"        ... ve {len(items) - 5} adet daha (Tamamı JSON raporunda).")
+                
+    print("-" * 60 + "\n")
