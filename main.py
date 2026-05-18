@@ -11,6 +11,7 @@ from analyzer.utils import (
     print_hashes, 
     export_report,
     print_ip_audit,
+    print_iocs,
     check_virustotal  # <-- YENİ EKLENDİ
 )
 
