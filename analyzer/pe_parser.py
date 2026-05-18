@@ -1,4 +1,5 @@
 import pefile
+import re
 from .entropy import calculate_shannon_entropy
 
 class PEAnalyzer:
