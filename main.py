@@ -12,7 +12,7 @@ from analyzer.utils import (
     export_report,
     print_ip_audit,
     check_virustotal,
-    print_iocs
+    print_iocs,
     calculate_and_print_risk_score
 )
 
@@ -41,6 +41,7 @@ def main():
         report_data["hash_degerleri"] = hashes
         
         # 0.5 VirusTotal Canlı İstihbarat
+        vt_results = None
         if args.vt:
             vt_results = check_virustotal(hashes.get('SHA-256'), args.vt)
             report_data["virustotal_raporu"] = vt_results
@@ -75,6 +76,10 @@ def main():
         
         # 4. Şüpheli API (Güvenlik) Kontrolü
         check_suspicious_apis(imports)
+        
+        # 4.5 Heuristik Risk Skorlama
+        risk_report = calculate_and_print_risk_score(sections, imports, ip_metadata, iocs, vt_results)
+        report_data["nihai_risk_skoru"] = risk_report
         
         # 5. Rapor Dışa Aktarma
         if args.export:
