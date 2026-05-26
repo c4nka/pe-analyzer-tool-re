@@ -202,3 +202,78 @@ def print_iocs(iocs: dict):
                 print(f"        ... ve {len(items) - 5} adet daha (Tamamı JSON raporunda).")
                 
     print("-" * 60 + "\n")
+
+def calculate_and_print_risk_score(sections, imports, ip_metadata, iocs, vt_results) -> dict:
+    """Toplanan tüm kanıtları heuristik olarak değerlendirip nihai bir risk skoru (0-100) üretir."""
+    risk_score = 0
+    reasons = []
+
+    # 1. Entropi Analizi (Paketlenmiş/Şifrelenmiş Kod)
+    high_entropy = any(sec.get('Entropy', 0.0) > 7.0 for sec in sections)
+    if high_entropy:
+        risk_score += 20
+        reasons.append("Yüksek entropi tespit edildi (Kod paketlenmiş veya şifrelenmiş olabilir).")
+
+    # 2. Şüpheli API Kontrolü
+    suspicious_list = [
+        'CreateRemoteThread', 'VirtualAllocEx', 'WriteProcessMemory', 
+        'ReadProcessMemory', 'LoadLibraryA', 'GetProcAddress', 
+        'SetWindowsHookEx', 'RegSetValueEx', 'WinExec', 'ShellExecute'
+    ]
+    found_suspicious = sum(1 for apis in imports.values() for api in apis if api in suspicious_list)
+    if found_suspicious > 0:
+        added_score = min(found_suspicious * 5, 25) # Her şüpheli API 5 puan, maksimum 25 puan
+        risk_score += added_score
+        reasons.append(f"{found_suspicious} adet şüpheli API çağrısı bulundu (+{added_score} Puan).")
+
+    # 3. Fikri Mülkiyet (IP Audit) Kontrolü
+    legal_keys = ['CompanyName', 'LegalCopyright', 'OriginalFilename']
+    has_legal_meta = any(key in ip_metadata and ip_metadata[key].strip() for key in legal_keys)
+    if not has_legal_meta:
+        risk_score += 15
+        reasons.append("Yasal meta veriler eksik (Amatör, korsan veya manipüle edilmiş dosya).")
+
+    # 4. IoC (Gizli Ağ Bağlantıları) Kontrolü
+    has_iocs = any(len(items) > 0 for items in iocs.values())
+    if has_iocs:
+        risk_score += 10
+        reasons.append("Dosya içerisine gömülü gizli IP/URL adresleri (IoC) tespit edildi.")
+
+    # 5. VirusTotal Canlı İstihbarat Kontrolü
+    if vt_results and vt_results.get("tespit_edilen", 0) > 0:
+        risk_score += 50
+        reasons.append(f"VirusTotal İstihbaratı: {vt_results['tespit_edilen']} motor dosyayı ZARARLI olarak işaretledi!")
+
+    # Skoru 100 ile sınırla
+    risk_score = min(risk_score, 100)
+
+    # Karar Mekanizması
+    if risk_score >= 70:
+        verdict = "KRİTİK RİSK (YÜKSEK İHTİMALLE ZARARLI YAZILIM)"
+        color_code = "\033[91m" # Kırmızı
+    elif risk_score >= 40:
+        verdict = "ŞÜPHELİ (DİKKATLİ İNCELENMELİ)"
+        color_code = "\033[93m" # Sarı
+    else:
+        verdict = "DÜŞÜK RİSK (TEMİZ GÖRÜNÜYOR)"
+        color_code = "\033[92m" # Yeşil
+        
+    reset_color = "\033[0m"
+
+    print("=" * 60)
+    print("[+] NİHAİ KARAR VE HEURİSTİK RİSK SKORU")
+    print("=" * 60)
+    print(f"    RİSK SKORU: {color_code}{risk_score} / 100{reset_color}")
+    print(f"    KARAR:      {color_code}{verdict}{reset_color}\n")
+    print("    Gerekçeler:")
+    for reason in reasons:
+        print(f"    - {reason}")
+    if not reasons:
+        print("    - Belirgin bir tehdit vektörü tespit edilmedi.")
+    print("=" * 60 + "\n")
+
+    return {
+        "skor": risk_score,
+        "karar": verdict,
+        "gerekceler": reasons
+    }
