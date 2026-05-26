@@ -13,6 +13,7 @@ from analyzer.utils import (
     print_ip_audit,
     check_virustotal,
     print_iocs
+    calculate_and_print_risk_score
 )
 
 def main():
