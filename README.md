@@ -9,7 +9,7 @@
   ![Language](https://img.shields.io/badge/Language-Python-blue?style=flat-square)
   ![Status](https://img.shields.io/badge/Status-Completed-success?style=flat-square)
   ![Course](https://img.shields.io/badge/Course-BGT210-purple?style=flat-square)
-  ![License](https://img.shields.io/badge/License-Educational-green?style=flat-square)
+  ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 </div>
 
 ---
