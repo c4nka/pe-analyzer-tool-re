@@ -63,9 +63,16 @@ Bu proje, Portable Executable (PE) dosyaları için otomatikleştirilmiş bir st
 │   ├── modules/          # Risk skorlama, IoC tespiti teknik analizleri
 │   ├── research/         # Entropi ve API hook teorileri
 │   └── references/       # Referans materyaller
+├── src/                  # Core application source code
+│   ├── main.py              # CLI arayüzünü tetikleyen ana dosyan
+│   ├── __init__.py          # (Opsiyonel boş dosya)
+│   │
+│   └── analyzer/            # <-- Klasör bütünlüğü korunarak buraya geldi
+│       ├── __init__.py      # (Kesinlikle olması gereken boş dosya)
+│       ├── pe_parser.py     # Analiz motoru
+│       └── utils.py         # Yardımcı araçlar
 ├── samples/              # Analiz edilecek şüpheli dosyaların konacağı klasör
 ├── reports/              # Üretilen JSON analiz raporları
-├── src/                  # Core application source code
 ├── requirements.txt      # Python bağımlılıkları
 ├── Dockerfile            # Kum havuzu (Sandbox) imaj yapılandırması
 ├── docker-compose.yml    # İzole ağ ve volume yapılandırması
