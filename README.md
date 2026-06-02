@@ -66,6 +66,7 @@ Bu proje, Portable Executable (PE) dosyaları için otomatikleştirilmiş bir st
 │   └── references/       # Referans materyaller
 ├── samples/              # Analiz edilecek şüpheli dosyaların konacağı klasör
 ├── reports/              # Üretilen JSON analiz raporları
+├── src/                  # Core application source code
 ├── main.py               # Ana CLI tetikleyici
 ├── requirements.txt      # Python bağımlılıkları
 ├── Dockerfile            # Kum havuzu (Sandbox) imaj yapılandırması
