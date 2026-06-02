@@ -84,7 +84,7 @@ Bu proje, Portable Executable (PE) dosyaları için otomatikleştirilmiş bir st
 ## 🚀 Getting Started / Kurulum
 
 ```bash
-git clone [https://github.com/c4nka/](https://github.com/c4nka/pe-analyzer-tool-re)
+git clone [https://github.com/c4nka/pe-analyzer-tool-re](https://github.com/c4nka/pe-analyzer-tool-re)
 cd [your-repo]
 
 # Ortam değişkenlerini ayarlayın (VirusTotal API anahtarınızı girin)
