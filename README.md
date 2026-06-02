@@ -5,7 +5,7 @@
 
   # Advanced PE Analyzer & Threat Intelligence Tool
 
-  ![GitHub](https://img.shields.io/badge/GitHub-Private-red?style=flat-square&logo=github)
+  ![GitHub](https://img.shields.io/badge/GitHub-Public-red?style=flat-square&logo=github)
   ![Language](https://img.shields.io/badge/Language-Python-blue?style=flat-square)
   ![Status](https://img.shields.io/badge/Status-Completed-success?style=flat-square)
   ![Course](https://img.shields.io/badge/Course-BGT210-purple?style=flat-square)
