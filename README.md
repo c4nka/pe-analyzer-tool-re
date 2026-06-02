@@ -86,7 +86,7 @@ cd [your-repo]
 cp .env.example .env
 
 # Aracı izole Docker kum havuzunda (Sandbox) çalıştırmak için:
-docker-compose run --rm analyzer python main.py /samples/hedef_dosya.exe --export /reports/analiz_sonucu.json
+docker-compose run --rm analyzer python src/main.py /samples/hedef_dosya.exe --export /reports/analiz_sonucu.json
 ```
 
 ## 📊 Deliverables / Teslimler
