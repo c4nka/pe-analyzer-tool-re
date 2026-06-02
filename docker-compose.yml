@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  analyzer:
+    build: .
+    container_name: pe_analyzer_sandbox
+    # Bu bir web sunucusu olmadığı için sürekli açık kalmasına gerek yok.
+    # Biz sadece komut gönderdiğimizde çalışıp kapanacak izole bir ortam yaratıyoruz.
+    environment:
+      # Eğer .env dosyası kullanıyorsan VirusTotal anahtarını otomatik çeker
+      - VT_API_KEY=${VT_API_KEY:-} 
+    volumes:
+      # Uygulama kodları
+      - .:/app
+      # [GÜVENLİ BÖLGE] Analiz edilecek zararlı yazılımları atacağın klasör
+      - ./samples:/samples
+      # [ÇIKTI BÖLGESİ] Motorun üreteceği JSON raporlarının kaydedileceği klasör
+      - ./reports:/reports
+      
+    # [GÜVENLİK] Zararlı yazılım analiz edildiği için yetki yükseltme saldırılarını engeller
+    security_opt:
+      - no-new-privileges:true
+      
+    # Aracın sadece VirusTotal API'sine gidebilmesi için kontrollü ağ
+    networks:
+      - sandbox_network
+
+networks:
+  sandbox_network:
+    driver: bridge
