@@ -31,7 +31,7 @@
 | | |
 |---|---|
 | **Name / Ad Soyad** | Raşit Çankaya |
-| **Student ID / Öğrenci No** | `****[ÖĞRENCİ NUMARANIZIN ORTA RAKAMLARI]****` |
+| **Student ID / Öğrenci No** | `2420191006` |
 
 ---
 
@@ -84,7 +84,7 @@ Bu proje, Portable Executable (PE) dosyaları için otomatikleştirilmiş bir st
 ## 🚀 Getting Started / Kurulum
 
 ```bash
-git clone [https://github.com/rasitcankaya/](https://github.com/rasitcankaya/)[your-repo]
+git clone [https://github.com/c4nka/](https://github.com/c4nka/pe-analyzer-tool-re)
 cd [your-repo]
 
 # Ortam değişkenlerini ayarlayın (VirusTotal API anahtarınızı girin)
